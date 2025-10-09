@@ -7,6 +7,9 @@ pygame.display.set_caption("PolygonCreator")
 points = [] # to store the points of the polygon
 selected_point = None # to store the selected point for dragging
 dragging = False # to indicate if we are dragging a point
+polygon_closed = False # to indicate if the polygon is closed
+
+
 running = True
 
 
@@ -41,24 +44,35 @@ while running:
             dragging = False
             selected_point = None
             
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            polygon_closed = not polygon_closed
             
-        
+        # deleting point s
+        if event.type == pygame.KEYDOWN and selected_point is not None:
+            if event.key == pygame.K_BACKSPACE or event.key == pygame.K_DELETE:
+                points.pop(selected_point)
+                selected_point = None
+                dragging = False
+            
+        if event.type == pygame.KEYDOWN:
+            print("Key pressed:", event.key)
 
     
     # loop through the points list and for each draw small circle sgreen radius 5
-    for point in points:
-        pygame.draw.circle(screen, (0, 255, 0), point, 5)
-    # if there are more than 1 point draw lines between them
+    for i, point in enumerate(points):
+        colour = (255, 255, 0) if i == selected_point else (0, 255, 0)
+        pygame.draw.circle(screen, colour, point, 5)
+        
+        
+    
     if len(points) > 1:
-        pygame.draw.lines(screen, (0, 0, 255), False, points, 2)  
-    
-    # if thre are more than 2 points function that connects points in order (not closed shape yet)
-    if len(points) > 2:
-        pygame.draw.polygon(screen, (255, 0, 0), points, 2)  
+        if polygon_closed and len(points) > 2:
+            pygame.draw.polygon(screen, (255, 0, 0), points, 2)
+        else:
+            pygame.draw.lines(screen, (0, 0, 255), False, points, 2 )
         
-    # on mousebuttondown loop through all point s
-    
-        
+
+
             
 
     pygame.display.flip()
