@@ -4,6 +4,10 @@ pygame.init()
 screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("PolygonCreator")
 
+# Add frame rate control to reduce CPU usage
+clock = pygame.time.Clock()
+FPS = 60  # Target frames per second
+
 points = [] # to store the points of the polygon
 selected_point = None # to store the selected point for dragging
 dragging = False # to indicate if we are dragging a point
@@ -22,10 +26,11 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             pos = pygame.mouse.get_pos()
+            # Optimized: use squared distance to avoid expensive sqrt calculation
             for i, point in enumerate(points):
                 dx = pos[0] - point[0]
                 dy = pos[1] - point[1]
-                if dx**2 + dy**2 < 100: #within 10 pixels
+                if dx**2 + dy**2 < 100: #within 10 pixels (10^2 = 100)
                     selected_point = i
                     dragging = True
                     break
@@ -33,12 +38,9 @@ while running:
                 points.append(pos)
         
         if event.type == pygame.MOUSEMOTION and dragging and selected_point is not None:
-            if pygame.mouse.get_pressed()[0]: # left button is held down
-                pos = pygame.mouse.get_pos()
-                points[selected_point] = pos
-            else:
-                dragging = False
-                selected_point = None
+            # Optimized: removed redundant get_pressed() check - dragging flag already tracks this
+            pos = pygame.mouse.get_pos()
+            points[selected_point] = pos
         
         if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             dragging = False
@@ -53,9 +55,6 @@ while running:
                 points.pop(selected_point)
                 selected_point = None
                 dragging = False
-            
-        if event.type == pygame.KEYDOWN:
-            print("Key pressed:", event.key)
 
     
     # loop through the points list and for each draw small circle sgreen radius 5
@@ -76,8 +75,6 @@ while running:
             
 
     pygame.display.flip()
-
-
-
-
+    # Limit frame rate to reduce CPU usage
+    clock.tick(FPS)
 
